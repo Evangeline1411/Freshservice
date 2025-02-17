@@ -13,52 +13,40 @@
       "capabilities": {
         "response_semantics": {
           "data_path": "$.orders",
-          "properties": {
-            "title": "$.name",
-            "subtitle": "$.id"
-          },
           "static_template": {
             "type": "AdaptiveCard",
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "version": "1.4",
             "body": [
               {
+                "type": "TextBlock",
+                "text": "Purchase Orders",
+                "weight": "Bolder",
+                "size": "Large",
+                "separator": true
+              },
+              {
                 "type": "Container",
-                "items": [
+                "items":[
                   {
                     "type": "TextBlock",
-                    "text": "Purchase Orders",
-                    "weight": "Bolder",
-                    "size": "Large",
-                    "separator": true
+                    "text": "Order Name: ${name}",
+                    "wrap": true
                   },
                   {
-                    "type": "Container",
-                    "$data": "${$root}",
-                    "items": [
-                      {
-                        "type": "Container",
-                        "items": [
-                          {
-                            "type": "TextBlock",
-                            "text": "Order name: ${name}",
-                            "weight": "Bolder",
-                            "wrap": true
-                          },
-                          {
-                            "type": "TextBlock",
-                            "text": "Price: $${total_cost}",
-                            "weight": "Bolder",
-                            "wrap": true
-                          }
-                        ]
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": " ",
-                        "separator": true
-                      }
-                    ]
+                    "type": "TextBlock",
+                    "text": "Vendor ID: ${vendor_id}",
+                    "wrap": true
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Price: $${total_cost}",
+                    "wrap": true
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Expected Delivery Date: ${expected_delivery_date}",
+                    "wrap": true
                   }
                 ]
               }

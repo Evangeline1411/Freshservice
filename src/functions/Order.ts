@@ -6,6 +6,55 @@ const apiKey = "zQi9KIOIFz31yE4HDFL0";
 const baseURL = "https://quadracopilot.freshservice.com/api/v2/purchase_orders";
 
 
+const Adaptivecard=(orderList:any[]) =>{
+  return{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.4",
+    "body":[
+      {
+        "type": "TextBlock",
+        "text": "Purchase Orders",
+        "weight": "Bolder",
+        "size": "Large",
+        "separator": true
+      },
+      ...orderList.map(order => ({
+        "type": "Container",
+        "items":[
+          {
+            "type": "TextBlock",
+            "text": `Order name: ${order.name}`,
+            "wrap":true
+          },
+          {
+            "type": "TextBlock",
+            "text": `vendor ID: ${order.vendor_id}`,
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": `PO Number: ${order.po_number}`,
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": `Expected Delivery Date: ${order.expected_delivery_date}`,
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": " ",
+            "spacing": "Medium",
+            "separator": true
+          }
+        ]
+      }))
+    ]
+
+  };
+};
+
 // Function to get the purchase order
 const getPurchaseOrders = async (): Promise<any> => {
   if (!apiKey || !baseURL) {
@@ -44,8 +93,17 @@ const getPurchaseOrders = async (): Promise<any> => {
         throw new Error(`Request failed with status ${response.status}`);
       }
 
+      const filteredOrders = response.data.purchase_orders.map((order: any) => ({
+        name: order.name,
+        vendor_id: order.vendor_id,
+        po_number: order.po_number,
+        expected_delivery_date: order.expected_delivery_date
+      }));
+
       console.log(`[${new Date().toISOString()}] Data fetched successfully on attempt ${attempts}`);
-      return response.data;
+      return filteredOrders;
+
+  
 
     } catch (error) {
       console.error(`[${new Date().toISOString()}] Attempt ${attempts} failed: ${error.message}`);
@@ -123,15 +181,17 @@ export async function Orders(
   if(req.method === "GET"){
     console.log(`[${new Date().toISOString()}] GET request processing.`);
     try {
-      const orderResponse = await getPurchaseOrders();
-      context.log(`[${new Date().toISOString()}] Purchase orders fetched:`, JSON.stringify(orderResponse.purchase_orders));
-      
-      return {
+      const filteredOrders = await getPurchaseOrders();
+      context.log(`[${new Date().toISOString()}] Purchase orders fetched:`);
+
+      const adaptivecard = Adaptivecard(filteredOrders);
+      return{
         status: 200,
-        jsonBody: {
-          orders: orderResponse.purchase_orders,
+        headers: {
+          "Content-Type": "application/json"
         },
-     };
+        body: JSON.stringify(adaptivecard)
+      };
   } catch (error) {
     context.log(`[${new Date().toISOString()}] Error fetching purchase orders:`, error);
 
